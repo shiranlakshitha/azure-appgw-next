@@ -27,7 +27,7 @@ jobs:
 
         - name: Build docker image
           run: |
-            docker build -t $REGISTRY/$IMAGE_NAME:latest .
+            docker build -t $REGISTRY/$IMAGE_NAME:latest -f docker/dockerfile .
             docker push $REGISTRY/$IMAGE_NAME:latest
 
         - name: Deploy to VM1
@@ -37,7 +37,6 @@ jobs:
             username: ${{ secrets.VM1_USERNAME }}
             key: ${{ secrets.VM1_SSH_KEY }}
             script: |
-              docker build -t $REGISTRY/$IMAGE_NAME:latest .
               docker pull $REGISTRY/$IMAGE_NAME:latest
               docker stop nextjs-app || true
               docker rm nextjs-app || true
@@ -50,7 +49,6 @@ jobs:
             username: ${{ secrets.VM2_USERNAME }}
             key: ${{ secrets.VM2_SSH_KEY }}
             script: |
-              docker build -t $REGISTRY/$IMAGE_NAME:latest .
               docker pull $REGISTRY/$IMAGE_NAME:latest
               docker stop nextjs-app || true
               docker rm nextjs-app || true
