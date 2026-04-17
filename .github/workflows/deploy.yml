@@ -1,0 +1,42 @@
+name: build and deploy next js
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+    IMAGE_NAME: nextjs-app
+    REGISTRY: ghcr.io
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        vm_host: [VM1_PUBLIC_IP, VM2_PUBLIC_IP]
+
+    steps:
+        - name: checkout code
+          uses: actions/checkout@v3
+
+        - name: Login to azure
+          uses: azure/login@v1
+          with:
+            creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+        - name: Build docker image
+          run: |
+            docker push $REGISTRY/$IMAGE_NAME:latest
+
+        - name: Deploy to VM
+          uses: appleboy/ssh-action@v0.1.10
+          with:
+            host: ${{ matrix.vm_host }}
+            username: ${{ secrets.VM_USERNAME }}
+            key: ${{ secrets.VM_SSH_KEY }}
+            script: |
+              docker pull $REGISTRY/$IMAGE_NAME:latest
+              docker stop nextjs-app || true
+              docker rm nextjs-app || true
+              docker run -d --name nextjs-app -p 80:3000 $REGISTRY/$IMAGE_NAME:latest
+            

@@ -1,0 +1,67 @@
+# Git
+.git
+.gitignore
+
+# Node.js
+node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Next.js
+.next
+out
+build
+
+# Logs
+logs
+*.log
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE / Editor
+.vscode
+.idea
+*.swp
+*.swo
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Temporary files
+tmp
+temp
+*.tmp
+
+# Coverage / Testing
+coverage
+.nyc_output
+
+# Build outputs
+dist
+bin
+obj
+
+# .NET specific
+*.user
+*.suo
+*.cache
+*.dll
+*.exe
+
+# Mongo / Database dumps
+dump
+*.bson
+*.json
+
+# Misc
+*.md
