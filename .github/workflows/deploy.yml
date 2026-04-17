@@ -6,20 +6,11 @@ on:
 
 env:
     IMAGE_NAME: nextjs-app
-    REGISTRY: ghcr.io
+    REGISTRY: touristwebregistry.io
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - vm_host: ${{ secrets.VM1_PUBLIC_IP }}
-            vm_username_secret: ${{ secrets.VM1_USERNAME }}
-            vm_ssh_key_secret: ${{ secrets.VM1_SSH_KEY }}
-          - vm_host: ${{ secrets.VM2_PUBLIC_IP }}
-            vm_username_secret: ${{ secrets.VM2_USERNAME }}
-            vm_ssh_key_secret: ${{ secrets.VM2_SSH_KEY }}
 
     steps:
         - name: checkout code
@@ -34,12 +25,24 @@ jobs:
           run: |
             docker push $REGISTRY/$IMAGE_NAME:latest
 
-        - name: Deploy to VM
+        - name: Deploy to VM1
           uses: appleboy/ssh-action@v0.1.10
           with:
-            host: ${{ matrix.vm_host }}
-            username: ${{ secrets[matrix.vm_username_secret] }}
-            key: ${{ secrets[matrix.vm_ssh_key_secret] }}
+            host: ${{ secrets.VM1_PUBLIC_IP }}
+            username: ${{ secrets.VM1_USERNAME }}
+            key: ${{ secrets.VM1_SSH_KEY }}
+            script: |
+              docker pull $REGISTRY/$IMAGE_NAME:latest
+              docker stop nextjs-app || true
+              docker rm nextjs-app || true
+              docker run -d --name nextjs-app -p 80:3000 $REGISTRY/$IMAGE_NAME:latest
+
+        - name: Deploy to VM2
+          uses: appleboy/ssh-action@v0.1.10
+          with:
+            host: ${{ secrets.VM2_PUBLIC_IP }}
+            username: ${{ secrets.VM2_USERNAME }}
+            key: ${{ secrets.VM2_SSH_KEY }}
             script: |
               docker pull $REGISTRY/$IMAGE_NAME:latest
               docker stop nextjs-app || true
