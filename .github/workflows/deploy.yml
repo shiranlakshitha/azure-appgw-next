@@ -13,7 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        vm_host: [VM1_PUBLIC_IP, VM2_PUBLIC_IP]
+        include:
+          - vm_host: ${{ secrets.VM1_PUBLIC_IP }}
+            vm_username_secret: ${{ secrets.VM1_USERNAME }}
+            vm_ssh_key_secret: ${{ secrets.VM1_SSH_KEY }}
+          - vm_host: ${{ secrets.VM2_PUBLIC_IP }}
+            vm_username_secret: ${{ secrets.VM2_USERNAME }}
+            vm_ssh_key_secret: ${{ secrets.VM2_SSH_KEY }}
 
     steps:
         - name: checkout code
@@ -32,8 +38,8 @@ jobs:
           uses: appleboy/ssh-action@v0.1.10
           with:
             host: ${{ matrix.vm_host }}
-            username: ${{ secrets.VM_USERNAME }}
-            key: ${{ secrets.VM_SSH_KEY }}
+            username: ${{ secrets[matrix.vm_username_secret] }}
+            key: ${{ secrets[matrix.vm_ssh_key_secret] }}
             script: |
               docker pull $REGISTRY/$IMAGE_NAME:latest
               docker stop nextjs-app || true
